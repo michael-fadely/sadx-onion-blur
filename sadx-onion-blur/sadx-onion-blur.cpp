@@ -223,6 +223,7 @@ static void __cdecl njAction_TailsWrapper(NJS_ACTION* action, Float frame)
 			njAction_Queue(action, frame, QueuedModelFlagsB_EnableZWrite);
 			njColorBlendingMode(NJD_SOURCE_COLOR, NJD_COLOR_BLENDING_SRCALPHA);
 			njColorBlendingMode(NJD_DESTINATION_COLOR, NJD_COLOR_BLENDING_INVSRCALPHA);
+			RestoreTails(action);
 		}
 		else
 		{
