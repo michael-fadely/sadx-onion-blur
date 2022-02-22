@@ -2,6 +2,8 @@
 
 // Tails always renders two additional tail models, so we can
 // use this to alternate between an alpha of .75 and .5
+// Same for Knuckles because he also renders two models.
+
 static bool tails_hack = false;
 
 static void __cdecl njAction_Onion(NJS_ACTION* action, float frame)
@@ -79,7 +81,7 @@ static void __declspec(naked) sub_494400_asm()
 	}
 }
 
-static void __cdecl njAction_TailsWrapper(NJS_ACTION* action, Float frame)
+static void __cdecl njAction_TailsKnucklesWrapper(NJS_ACTION* action, Float frame)
 {
 	const uint32_t control_3d_orig = _nj_control_3d_flag_;
 	const NJS_ARGB color_orig = GlobalSpriteColor;
@@ -109,16 +111,6 @@ static void __cdecl njAction_TailsWrapper(NJS_ACTION* action, Float frame)
 	GlobalSpriteColor = color_orig;
 }
 
-static void __cdecl SetCurrentLightType_r(int a1)
-{
-	Direct3D_PerformLighting(a1 * 2);
-}
-
-static void __cdecl SetCurrentLightType_Copy_hijack(int a1)
-{
-	CurrentLightType_Copy = a1;
-}
-
 extern "C"
 {
 	__declspec(dllexport) ModInfo SADXModInfo = { ModLoaderVer };
@@ -130,18 +122,14 @@ extern "C"
 		WriteCall(reinterpret_cast<void*>(0x00494B00), &sub_494400_asm);
 
 		// Tails' tails
-		WriteCall(reinterpret_cast<void*>(0x00461156), njAction_TailsWrapper);
+		WriteCall(reinterpret_cast<void*>(0x00461156), njAction_TailsKnucklesWrapper);
 		WriteData<5>(reinterpret_cast<void*>(0x004610AF), 0x90i8);
 		WriteData<5>(reinterpret_cast<void*>(0x004611A9), 0x90i8);
 
 		// Allows tail onion skin to be rendered while paused
 		WriteData<2>(reinterpret_cast<void*>(0x0046110E), 0x90i8);
 
-		// Enables light type preservation in the draw queue.
-		WriteData<2>(reinterpret_cast<void*>(0x004087A2), 0x90i8);
-		WriteData<2>(reinterpret_cast<void*>(0x004088AE), 0x90i8);
-		WriteJump(SetCurrentLightType, SetCurrentLightType_r);
-		WriteJump(SetCurrentLightType_Copy, SetCurrentLightType_r);
-		WriteCall(reinterpret_cast<void*>(0x00412440), SetCurrentLightType_Copy_hijack);
+		// Knuckles' motion blur
+		WriteCall(reinterpret_cast<void*>(0x00472626), njAction_TailsKnucklesWrapper);
 	}
 }
