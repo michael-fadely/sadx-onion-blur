@@ -56,14 +56,19 @@ static void __cdecl sub_494400_o(int a1, CharObj2* a2)
 
 static void __cdecl sub_494400_c(int anim_index, CharObj2* data2)
 {
-	if (MetalSonicFlag || anim_index != 13)
+	if (MetalSonicFlag)
+		goto original;
+	switch (anim_index)
 	{
-		sub_494400_o(anim_index, data2);
+	case 13:
+	case 14:
+		njAction(data2->AnimationThing.AnimData[anim_index].Animation, data2->AnimationThing.Frame);
+		njAction_Onion(data2->AnimationThing.AnimData[anim_index].Animation, data2->AnimationThing.Frame);
 		return;
 	}
-
-	njAction(data2->AnimationThing.AnimData[anim_index].Animation, data2->AnimationThing.Frame);
-	njAction_Onion(data2->AnimationThing.AnimData[anim_index].Animation, data2->AnimationThing.Frame);
+original:
+	sub_494400_o(anim_index, data2);
+	return;
 }
 
 static void __declspec(naked) sub_494400_asm()
