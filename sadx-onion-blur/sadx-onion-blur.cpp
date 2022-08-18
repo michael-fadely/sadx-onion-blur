@@ -10,13 +10,13 @@ static void __cdecl njAction_Onion(NJS_ACTION* action, float frame)
 {
 	const auto frame_count = static_cast<float>(action->motion->nbFrame);
 
-	const NJS_ARGB color_orig = GlobalSpriteColor;
-	const uint32_t control_3d_orig = _nj_control_3d_flag_;
+	const NJS_ARGB color_orig = cur_argb;
+	const uint32_t control_3d_orig = nj_control_3d_flag_;
 
-	_nj_control_3d_flag_ |= NJD_CONTROL_3D_CONSTANT_ATTR | NJD_CONTROL_3D_CONSTANT_MATERIAL;
+	nj_control_3d_flag_ |= NJD_CONTROL_3D_CONSTANT_ATTR | NJD_CONTROL_3D_CONSTANT_MATERIAL;
 
-	BackupConstantAttr();
-	AddConstantAttr(0, NJD_FLAG_USE_ALPHA);
+	SaveConstantAttr();
+	OnConstantAttr(0, NJD_FLAG_USE_ALPHA);
 	njColorBlendingMode(NJD_SOURCE_COLOR, NJD_COLOR_BLENDING_SRCALPHA);
 	njColorBlendingMode(NJD_DESTINATION_COLOR, NJD_COLOR_BLENDING_ONE);
 
@@ -24,7 +24,7 @@ static void __cdecl njAction_Onion(NJS_ACTION* action, float frame)
 
 	for (int i = 0; i < 2; ++i)
 	{
-		SetMaterialAndSpriteColor_Float(alpha, 1.0, 1.0, 1.0);
+		SetMaterial(alpha, 1.0f, 1.0f, 1.0f);
 
 		alpha -= 0.25f;
 		frame -= 2.0f;
@@ -34,46 +34,53 @@ static void __cdecl njAction_Onion(NJS_ACTION* action, float frame)
 			frame = frame_count + frame;
 		}
 
-		njAction_Queue(action, frame, QueuedModelFlagsB_EnableZWrite);
+		late_Action(action, frame, LATE_WZ);
 	}
 
-	RestoreConstantAttr();
-	_nj_control_3d_flag_ = control_3d_orig;
-	GlobalSpriteColor = color_orig;
+	LoadConstantAttr();
+	nj_control_3d_flag_ = control_3d_orig;
+	cur_argb = color_orig;
 }
 
-static const void* loc_494400 = reinterpret_cast<const void*>(0x494400);
+static const void* DrawSonicMotion_loc = reinterpret_cast<const void*>(0x00494400); // DrawSonicMotion usercall
 
-static void __cdecl sub_494400_o(int a1, CharObj2* a2)
+static void __cdecl DrawSonicMotion_o(int a1, playerwk* a2)
 {
 	__asm
 	{
 		mov eax, a1
 		mov esi, a2
-		call loc_494400
+		call DrawSonicMotion_loc
 	}
 }
 
-static void __cdecl sub_494400_c(int anim_index, CharObj2* data2)
+static void __cdecl DrawSonicMotion_c(int anim_index, playerwk* data2)
 {
-	if (MetalSonicFlag || anim_index != 13)
+	if (!gu8flgPlayingMetalSonic)
 	{
-		sub_494400_o(anim_index, data2);
-		return;
+		switch (anim_index)
+		{
+			case 13: // Running
+			case 14: // Spindash
+				ds_ActionClip(data2->mj.plactptr[anim_index].actptr, data2->mj.nframe, 0.0f);
+				njAction_Onion(data2->mj.plactptr[anim_index].actptr, data2->mj.nframe);
+				return;
+			default:
+				break;
+		}
 	}
-
-	njAction(data2->AnimationThing.AnimData[anim_index].Animation, data2->AnimationThing.Frame);
-	njAction_Onion(data2->AnimationThing.AnimData[anim_index].Animation, data2->AnimationThing.Frame);
+	DrawSonicMotion_o(anim_index, data2);
+	return;
 }
 
-static void __declspec(naked) sub_494400_asm()
+static void __declspec(naked) DrawSonicMotion_asm()
 {
 	__asm
 	{
 		push esi // a2
 		push eax // a1
 
-		call sub_494400_c
+		call DrawSonicMotion_c
 
 		pop eax // a1
 		pop esi // a2
@@ -81,34 +88,34 @@ static void __declspec(naked) sub_494400_asm()
 	}
 }
 
-static void __cdecl njAction_TailsKnucklesWrapper(NJS_ACTION* action, Float frame)
+static void __cdecl njAction_TailsKnucklesWrapper(NJS_ACTION* action, float frame)
 {
-	const uint32_t control_3d_orig = _nj_control_3d_flag_;
-	const NJS_ARGB color_orig = GlobalSpriteColor;
+	const uint32_t control_3d_orig = nj_control_3d_flag_;
+	const NJS_ARGB color_orig = cur_argb;
 
-	_nj_control_3d_flag_ |= NJD_CONTROL_3D_CONSTANT_ATTR | NJD_CONTROL_3D_CONSTANT_MATERIAL;
+	nj_control_3d_flag_ |= NJD_CONTROL_3D_CONSTANT_ATTR | NJD_CONTROL_3D_CONSTANT_MATERIAL;
 
-	BackupConstantAttr();
-	AddConstantAttr(0, NJD_FLAG_USE_ALPHA);
+	SaveConstantAttr();
+	OnConstantAttr(0, NJD_FLAG_USE_ALPHA);
 	njColorBlendingMode(NJD_SOURCE_COLOR, NJD_COLOR_BLENDING_SRCALPHA);
 	njColorBlendingMode(NJD_DESTINATION_COLOR, NJD_COLOR_BLENDING_ONE);
 
 	float alpha = tails_hack ? 0.5f : 0.75f;
 	tails_hack = !tails_hack;
-	SetMaterialAndSpriteColor_Float(alpha, 1.0f, 1.0f, 1.0f);
+	SetMaterial(alpha, 1.0f, 1.0f, 1.0f);
 
-	const auto last_bias = DrawQueueDepthBias;
-	DrawQueueDepthBias = -47952.0f;
+	const auto last_bias = late_z_ofs___;
+	late_z_ofs___ = -47952.0f;
 
-	Direct3D_PerformLighting(2);
-	njAction_Queue(action, frame, QueuedModelFlagsB_EnableZWrite);
-	Direct3D_PerformLighting(0);
+	___dsSetPalette(2);
+	late_Action(action, frame, LATE_WZ);
+	___dsSetPalette(0);
 
-	DrawQueueDepthBias = last_bias;
+	late_z_ofs___ = last_bias;
 
-	RestoreConstantAttr();
-	_nj_control_3d_flag_ = control_3d_orig;
-	GlobalSpriteColor = color_orig;
+	LoadConstantAttr();
+	nj_control_3d_flag_ = control_3d_orig;
+	cur_argb = color_orig;
 }
 
 extern "C"
@@ -118,8 +125,8 @@ extern "C"
 	__declspec(dllexport) void __cdecl Init(const char* path, const HelperFunctions& helperFunctions)
 	{
 		// Sonic's motion blur
-		WriteCall(reinterpret_cast<void*>(0x004947B7), &sub_494400_asm);
-		WriteCall(reinterpret_cast<void*>(0x00494B00), &sub_494400_asm);
+		WriteCall(reinterpret_cast<void*>(0x004947B7), &DrawSonicMotion_asm);
+		WriteCall(reinterpret_cast<void*>(0x00494B00), &DrawSonicMotion_asm);
 
 		// Tails' tails
 		WriteCall(reinterpret_cast<void*>(0x00461156), njAction_TailsKnucklesWrapper);
