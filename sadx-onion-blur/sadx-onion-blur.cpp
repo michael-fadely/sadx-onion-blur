@@ -56,19 +56,19 @@ static void __cdecl DrawSonicMotion_o(int a1, playerwk* a2)
 
 static void __cdecl DrawSonicMotion_c(int anim_index, playerwk* data2)
 {
-	if (gu8flgPlayingMetalSonic)
-		goto original;
-	switch (anim_index)
+	if (!gu8flgPlayingMetalSonic)
 	{
-	case 13: // Running
-	case 14: // Spindash
-		ds_ActionClip(data2->mj.plactptr[anim_index].actptr, data2->mj.nframe, 0.0f);
-		njAction_Onion(data2->mj.plactptr[anim_index].actptr, data2->mj.nframe);
-		return;
-	default:
-		goto original;
+		switch (anim_index)
+		{
+			case 13: // Running
+			case 14: // Spindash
+				ds_ActionClip(data2->mj.plactptr[anim_index].actptr, data2->mj.nframe, 0.0f);
+				njAction_Onion(data2->mj.plactptr[anim_index].actptr, data2->mj.nframe);
+				return;
+			default:
+				break;
+		}
 	}
-original:
 	DrawSonicMotion_o(anim_index, data2);
 	return;
 }
