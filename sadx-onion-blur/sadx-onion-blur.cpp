@@ -56,7 +56,7 @@ static void __cdecl DrawSonicMotion_o(int a1, playerwk* a2)
 
 static void __cdecl DrawSonicMotion_c(int anim_index, playerwk* data2)
 {
-	if (!gu8flgPlayingMetalSonic)
+	if (!gu8flgPlayingMetalSonic && (data2->flag & 1) != 0) // Not in the air
 	{
 		switch (anim_index)
 		{
