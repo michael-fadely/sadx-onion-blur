@@ -69,8 +69,8 @@ static void __cdecl DrawSonicMotion_c(int anim_index, playerwk* data2)
 				break;
 		}
 	}
+
 	DrawSonicMotion_o(anim_index, data2);
-	return;
 }
 
 static void __declspec(naked) DrawSonicMotion_asm()
