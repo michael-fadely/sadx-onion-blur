@@ -12,10 +12,10 @@ static void __cdecl njAction_Onion(NJS_ACTION* action, float frame)
 
 	const NJS_ARGB color_orig = cur_argb;
 	const uint32_t control_3d_orig = nj_control_3d_flag_;
+	const uint32_t constant_attr_orig = _nj_constant_attr_or_;
 
 	nj_control_3d_flag_ |= NJD_CONTROL_3D_CONSTANT_ATTR | NJD_CONTROL_3D_CONSTANT_MATERIAL;
 
-	SaveConstantAttr();
 	OnConstantAttr(0, NJD_FLAG_USE_ALPHA);
 	njColorBlendingMode(NJD_SOURCE_COLOR, NJD_COLOR_BLENDING_SRCALPHA);
 	njColorBlendingMode(NJD_DESTINATION_COLOR, NJD_COLOR_BLENDING_ONE);
@@ -37,7 +37,7 @@ static void __cdecl njAction_Onion(NJS_ACTION* action, float frame)
 		late_Action(action, frame, LATE_WZ);
 	}
 
-	LoadConstantAttr();
+	_nj_constant_attr_or_ = constant_attr_orig;
 	nj_control_3d_flag_ = control_3d_orig;
 	cur_argb = color_orig;
 }
