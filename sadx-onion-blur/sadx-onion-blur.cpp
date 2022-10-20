@@ -91,6 +91,7 @@ static void __declspec(naked) DrawSonicMotion_asm()
 static void __cdecl njAction_TailsKnucklesWrapper(NJS_ACTION* action, float frame)
 {
 	const uint32_t control_3d_orig = nj_control_3d_flag_;
+	const uint32_t constant_attr_orig = _nj_constant_attr_or_;
 	const NJS_ARGB color_orig = cur_argb;
 
 	nj_control_3d_flag_ |= NJD_CONTROL_3D_CONSTANT_ATTR | NJD_CONTROL_3D_CONSTANT_MATERIAL;
@@ -113,7 +114,7 @@ static void __cdecl njAction_TailsKnucklesWrapper(NJS_ACTION* action, float fram
 
 	late_z_ofs___ = last_bias;
 
-	LoadConstantAttr();
+	_nj_constant_attr_or_ = constant_attr_orig;
 	nj_control_3d_flag_ = control_3d_orig;
 	cur_argb = color_orig;
 }
