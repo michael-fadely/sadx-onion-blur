@@ -96,7 +96,6 @@ static void __cdecl njAction_TailsKnucklesWrapper(NJS_ACTION* action, float fram
 
 	nj_control_3d_flag_ |= NJD_CONTROL_3D_CONSTANT_ATTR | NJD_CONTROL_3D_CONSTANT_MATERIAL;
 
-	SaveConstantAttr();
 	OnConstantAttr(0, NJD_FLAG_USE_ALPHA);
 	njColorBlendingMode(NJD_SOURCE_COLOR, NJD_COLOR_BLENDING_SRCALPHA);
 	njColorBlendingMode(NJD_DESTINATION_COLOR, NJD_COLOR_BLENDING_ONE);
