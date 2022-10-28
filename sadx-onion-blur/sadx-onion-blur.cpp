@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "IniFile.hpp"
 
 // Tails always renders two additional tail models, so we can
 // use this to alternate between an alpha of .75 and .5
@@ -124,19 +125,28 @@ extern "C"
 
 	__declspec(dllexport) void __cdecl Init(const char* path, const HelperFunctions& helperFunctions)
 	{
+		const std::string s_path(path);
+		const std::string s_config_ini(s_path + "\\config.ini");
+		const IniFile* const config = new IniFile(s_config_ini);
 		// Sonic's motion blur
-		WriteCall(reinterpret_cast<void*>(0x004947B7), &DrawSonicMotion_asm);
-		WriteCall(reinterpret_cast<void*>(0x00494B00), &DrawSonicMotion_asm);
-
+		if (config->getBool("General", "EnableSonic", true))
+		{
+			WriteCall(reinterpret_cast<void*>(0x004947B7), &DrawSonicMotion_asm);
+			WriteCall(reinterpret_cast<void*>(0x00494B00), &DrawSonicMotion_asm);
+		}
 		// Tails' tails
-		WriteCall(reinterpret_cast<void*>(0x00461156), njAction_TailsKnucklesWrapper);
-		WriteData<5>(reinterpret_cast<void*>(0x004610AF), 0x90i8);
-		WriteData<5>(reinterpret_cast<void*>(0x004611A9), 0x90i8);
-
-		// Allows tail onion skin to be rendered while paused
-		WriteData<2>(reinterpret_cast<void*>(0x0046110E), 0x90i8);
-
+		if (config->getBool("General", "EnableTails", true))
+		{
+			WriteCall(reinterpret_cast<void*>(0x00461156), njAction_TailsKnucklesWrapper);
+			WriteData<5>(reinterpret_cast<void*>(0x004610AF), 0x90i8);
+			WriteData<5>(reinterpret_cast<void*>(0x004611A9), 0x90i8);
+			// Allows tail onion skin to be rendered while paused
+			WriteData<2>(reinterpret_cast<void*>(0x0046110E), 0x90i8);
+		}
 		// Knuckles' motion blur
-		WriteCall(reinterpret_cast<void*>(0x00472626), njAction_TailsKnucklesWrapper);
+		if (config->getBool("General", "EnableKnuckles", true))
+		{
+			WriteCall(reinterpret_cast<void*>(0x00472626), njAction_TailsKnucklesWrapper);
+		}
 	}
 }
